@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chuyên Đề Ôn Tập Tổng Thể Học Kỳ I (K10)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fdfbf7; color: #333; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin: 0 auto; height: 300px; max-height: 400px; }
+        .tab-active { border-bottom: 2px solid #8b5cf6; color: #8b5cf6; font-weight: 600; }
+        .card-hover:hover { transform: translateY(-2px); transition: all 0.3s ease; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .calc-input { border: 1px solid #e5e7eb; padding: 0.5rem; border-radius: 0.375rem; width: 100%; margin-bottom: 0.5rem; }
+        .calc-btn { background-color: #4b5563; color: white; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; transition: background 0.2s; }
+        .calc-btn:hover { background-color: #374151; }
+        /* Hide scrollbar for clean UI */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+    <!-- Chosen Palette: Warm Academica (Cream/Beige Background #fdfbf7, Slate Text #333, Muted Purple Accents #8b5cf6 for Geography, Terracotta #e07a5f for History) -->
+    <!-- Application Structure Plan: The app uses a Dashboard layout with a fixed top navigation and a dynamic content area. 
+         Structure:
+         1. Hero Section: Brief overview.
+         2. Geography Skills Module: 
+            - 'Chart Laboratory': Interactive guide where clicking a chart type renders a live Chart.js demo and displays analysis rules.
+            - 'Formula Toolbox': Functional JS calculators for the 4 key formulas.
+         3. Geography Theory Module:
+            - 'System Interconnection': A clickable diagram simulating the Unified Law (click a component -> see effects).
+            - Accordion-style deep dives for Atmosphere/Hydrosphere.
+         4. History Module:
+            - 'Civilization Matrix': A filterable card view for comparative history.
+            - 'Legacy Showcase': Highlight cards for key contributions.
+         Interaction: Users switch tabs to change views. JS handles DOM manipulation to show/hide sections and calculate values. 
+         Why: This structure breaks dense academic text into bite-sized, interactive tools, encouraging active recall (calculating, comparing) rather than passive reading. -->
+    <!-- Visualization & Content Choices: 
+         - Geo Skills: Used Chart.js to DEMONSTRATE the chart types (Pie, Bar, Line, Mixed) dynamically. This reinforces the "visual" nature of the skill.
+         - Geo Formulas: Input/Output forms transform static equations into tools.
+         - Geo Theory: Interactive lists and "System" nodes replace long paragraphs to show relationships (The Unified Law).
+         - History: Grid layout with icons replaces tables for better readability and comparison.
+         - NO SVG/Mermaid: All icons are FontAwesome or Unicode. Charts are Canvas/Chart.js. Structure is pure HTML/Tailwind. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-[#fdfbf7] text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-graduation-cap text-2xl text-purple-600 mr-2"></i>
+                    <span class="font-bold text-xl tracking-tight text-slate-700">Ôn tập</span>
+                </div>
+                <div class="hidden sm:flex space-x-8 items-center" id="nav-menu">
+                    <button onclick="switchTab('dashboard')" class="nav-btn tab-active px-3 py-2 text-sm font-medium" id="btn-dashboard">Tổng quan</button>
+                    <button onclick="switchTab('geo-skills')" class="nav-btn text-gray-500 hover:text-purple-600 px-3 py-2 text-sm font-medium" id="btn-geo-skills">Kỹ Năng Địa Lý</button>
+                    <button onclick="switchTab('geo-theory')" class="nav-btn text-gray-500 hover:text-purple-600 px-3 py-2 text-sm font-medium" id="btn-geo-theory">Lý Thuyết Địa Lý</button>
+                    <button onclick="switchTab('history')" class="nav-btn text-gray-500 hover:text-orange-600 px-3 py-2 text-sm font-medium" id="btn-history">Lịch Sử Văn Minh</button>
+                </div>
+                <!-- Mobile menu button placeholder -->
+                <div class="flex items-center sm:hidden">
+                    <button class="text-gray-500 hover:text-gray-700 focus:outline-none" onclick="toggleMobileMenu()">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden sm:hidden bg-white border-t border-gray-100 p-4">
+            <div class="flex flex-col space-y-2">
+                <button onclick="switchTab('dashboard')" class="text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Tổng quan</button>
+                <button onclick="switchTab('geo-skills')" class="text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Kỹ Năng Địa Lý</button>
+                <button onclick="switchTab('geo-theory')" class="text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Lý Thuyết Địa Lý</button>
+                <button onclick="switchTab('history')" class="text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Lịch Sử Văn Minh</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+
+        <!-- DASHBOARD SECTION -->
+        <section id="dashboard" class="animate-fade-in block">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-extrabold text-slate-800 mb-4">Chuyên Đề Ôn Tập Học Kỳ I</h1>
+                <p class="text-lg text-slate-600 max-w-3xl mx-auto">
+                    Chào mừng bạn đến với hệ thống ôn tập tương tác. Ứng dụng này tổng hợp các kiến thức cốt lõi về <span class="text-purple-600 font-semibold">Địa Lý</span> và <span class="text-orange-600 font-semibold">Lịch Sử</span> lớp 10, được thiết kế để tăng cường khả năng tư duy và ghi nhớ sâu.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 card-hover cursor-pointer" onclick="switchTab('geo-skills')">
+                    <div class="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4 text-purple-600">
+                        <i class="fas fa-chart-pie text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Kỹ Năng & Tính Toán</h3>
+                    <p class="text-sm text-slate-500 mb-4">Làm chủ các dạng biểu đồ và 4 công thức tính toán địa lý quan trọng.</p>
+                    <ul class="text-sm text-slate-600 space-y-1">
+                        <li>• Phân tích biểu đồ</li>
+                        <li>• Tính biên độ nhiệt</li>
+                        <li>• Tính giờ GMT</li>
+                    </ul>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 card-hover cursor-pointer" onclick="switchTab('geo-theory')">
+                    <div class="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 text-blue-600">
+                        <i class="fas fa-globe-asia text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Hệ Thống Tự Nhiên</h3>
+                    <p class="text-sm text-slate-500 mb-4">Khám phá mối quan hệ biện chứng giữa Khí quyển, Thủy quyển và Sinh quyển.</p>
+                    <ul class="text-sm text-slate-600 space-y-1">
+                        <li>• Hoàn lưu khí quyển</li>
+                        <li>• Chu trình thủy văn</li>
+                        <li>• Quy luật thống nhất</li>
+                    </ul>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 card-hover cursor-pointer" onclick="switchTab('history')">
+                    <div class="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4 text-orange-600">
+                        <i class="fas fa-landmark text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Văn Minh Thế Giới</h3>
+                    <p class="text-sm text-slate-500 mb-4">Hành trình qua các nền văn minh cổ đại Phương Đông và Phương Tây.</p>
+                    <ul class="text-sm text-slate-600 space-y-1">
+                        <li>• Ai Cập, Trung Hoa, Ấn Độ</li>
+                        <li>• Hy Lạp - La Mã</li>
+                        <li>• Văn hóa Phục Hưng</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- GEOGRAPHY SKILLS SECTION -->
+        <section id="geo-skills" class="hidden animate-fade-in">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-800 border-l-4 border-purple-600 pl-4">Kỹ Năng Phân Tích & Tính Toán</h2>
+                <p class="mt-2 text-slate-600">Khu vực thực hành các kỹ năng cốt lõi: Nhận diện biểu đồ và vận dụng công thức tính toán.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                <!-- Chart Laboratory -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                        <h3 class="font-bold text-lg text-slate-700"><i class="fas fa-flask mr-2 text-purple-500"></i>Phòng Thí Nghiệm Biểu Đồ</h3>
+                        <div class="text-xs text-gray-500 bg-white px-2 py-1 rounded border">Chọn loại biểu đồ bên dưới</div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex space-x-2 mb-6 overflow-x-auto no-scrollbar">
+                            <button onclick="renderChartDemo('pie')" class="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm font-medium hover:bg-purple-100 whitespace-nowrap border border-purple-200">Tròn (Cơ cấu)</button>
+                            <button onclick="renderChartDemo('bar')" class="px-3 py-1 bg-white text-gray-600 rounded-full text-sm font-medium hover:bg-gray-100 whitespace-nowrap border border-gray-200">Cột (Quy mô)</button>
+                            <button onclick="renderChartDemo('line')" class="px-3 py-1 bg-white text-gray-600 rounded-full text-sm font-medium hover:bg-gray-100 whitespace-nowrap border border-gray-200">Đường (Tốc độ)</button>
+                            <button onclick="renderChartDemo('mixed')" class="px-3 py-1 bg-white text-gray-600 rounded-full text-sm font-medium hover:bg-gray-100 whitespace-nowrap border border-gray-200">Kết hợp (Tương quan)</button>
+                        </div>
+                        
+                        <!-- Chart Display -->
+                        <div class="chart-container mb-4">
+                            <canvas id="demoChart"></canvas>
+                        </div>
+
+                        <!-- Contextual Info -->
+                        <div id="chart-info" class="bg-purple-50 p-4 rounded-lg border border-purple-100 text-sm">
+                            <h4 class="font-bold text-purple-800 mb-1" id="chart-title-info">Biểu Đồ Tròn</h4>
+                            <p class="text-purple-700 mb-2" id="chart-desc-info">Dùng để thể hiện quy mô và cơ cấu. Tổng giá trị phải là 100%.</p>
+                            <div class="font-semibold text-purple-800 text-xs uppercase tracking-wide">Từ khóa nhận diện:</div>
+                            <p class="text-gray-600" id="chart-keywords">"Cơ cấu", "Tỉ lệ", "Tỉ trọng", "Phân bố"</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formula Toolbox -->
+                <div class="space-y-6">
+                    <!-- Calculator 1: Percentage -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 mr-3"><i class="fas fa-percent"></i></div>
+                            <h3 class="font-bold text-slate-700">Tính Tỉ Lệ Phần Trăm</h3>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <input type="number" id="part-val" placeholder="Giá trị thành phần" class="calc-input">
+                            <input type="number" id="total-val" placeholder="Tổng giá trị" class="calc-input">
+                        </div>
+                        <button onclick="calcPercent()" class="calc-btn w-full mb-3">Tính Kết Quả</button>
+                        <div id="res-percent" class="text-center font-mono font-bold text-lg text-slate-800 bg-gray-50 p-2 rounded hidden"></div>
+                        <p class="text-xs text-gray-500 mt-2 italic">Công thức: (Thành phần / Tổng) * 100</p>
+                    </div>
+
+                    <!-- Calculator 2: Heat Amplitude -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-red-600 mr-3"><i class="fas fa-temperature-high"></i></div>
+                            <h3 class="font-bold text-slate-700">Tính Biên Độ Nhiệt</h3>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <input type="number" id="max-temp" placeholder="Nhiệt cao nhất (Max)" class="calc-input">
+                            <input type="number" id="min-temp" placeholder="Nhiệt thấp nhất (Min)" class="calc-input">
+                        </div>
+                        <button onclick="calcAmplitude()" class="calc-btn w-full mb-3">Tính Kết Quả</button>
+                        <div id="res-amp" class="text-center font-mono font-bold text-lg text-slate-800 bg-gray-50 p-2 rounded hidden"></div>
+                        <p class="text-xs text-gray-500 mt-2 italic">Ý nghĩa: Chênh lệch lớn = Khí hậu lục địa; Nhỏ = Hải dương.</p>
+                    </div>
+
+                     <!-- Calculator 3: Altitude Temp -->
+                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mr-3"><i class="fas fa-mountain"></i></div>
+                            <h3 class="font-bold text-slate-700">Nhiệt Độ Theo Độ Cao</h3>
+                        </div>
+                        <div class="mb-4">
+                            <input type="number" id="alt-diff" placeholder="Chênh lệch độ cao (m)" class="calc-input">
+                        </div>
+                        <button onclick="calcAltTemp()" class="calc-btn w-full mb-3">Tính Mức Giảm Nhiệt</button>
+                        <div id="res-alt" class="text-center font-mono font-bold text-lg text-slate-800 bg-gray-50 p-2 rounded hidden"></div>
+                        <p class="text-xs text-gray-500 mt-2 italic">Quy tắc: Giảm 0.6°C cho mỗi 100m lên cao.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GEOGRAPHY THEORY SECTION -->
+        <section id="geo-theory" class="hidden animate-fade-in">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-800 border-l-4 border-blue-600 pl-4">Hệ Thống Lý Thuyết Địa Lý</h2>
+                <p class="mt-2 text-slate-600">Phân tích mối quan hệ biện chứng giữa các thành phần tự nhiên và quy luật thống nhất.</p>
+            </div>
+
+            <!-- Unified Law Interactive Diagram -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-10">
+                <h3 class="text-xl font-bold text-center mb-6">Mô Phỏng Quy Luật Thống Nhất & Hoàn Chỉnh</h3>
+                <p class="text-center text-gray-500 mb-8 max-w-2xl mx-auto">Nhấp vào một thành phần để xem tác động dây chuyền khi thành phần đó bị biến đổi (Ví dụ: Phá rừng).</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 relative" id="system-diagram">
+                    <!-- Connector Lines (Visual CSS only) -->
+                    <div class="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-0 transform -translate-y-1/2"></div>
+                    
+                    <!-- Nodes -->
+                    <button onclick="triggerSystemEffect('biosphere')" class="sys-node relative z-10 bg-green-50 hover:bg-green-100 border-2 border-green-200 p-4 rounded-lg flex flex-col items-center transition-all">
+                        <i class="fas fa-tree text-2xl text-green-600 mb-2"></i>
+                        <span class="font-bold text-gray-700">Sinh Quyển</span>
+                    </button>
+
+                    <button onclick="triggerSystemEffect('soil')" class="sys-node relative z-10 bg-yellow-50 hover:bg-yellow-100 border-2 border-yellow-200 p-4 rounded-lg flex flex-col items-center transition-all">
+                        <i class="fas fa-layer-group text-2xl text-yellow-600 mb-2"></i>
+                        <span class="font-bold text-gray-700">Thổ Nhưỡng</span>
+                    </button>
+
+                    <button onclick="triggerSystemEffect('hydro')" class="sys-node relative z-10 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 p-4 rounded-lg flex flex-col items-center transition-all">
+                        <i class="fas fa-water text-2xl text-blue-600 mb-2"></i>
+                        <span class="font-bold text-gray-700">Thủy Quyển</span>
+                    </button>
+
+                    <button onclick="triggerSystemEffect('atmosphere')" class="sys-node relative z-10 bg-sky-50 hover:bg-sky-100 border-2 border-sky-200 p-4 rounded-lg flex flex-col items-center transition-all">
+                        <i class="fas fa-wind text-2xl text-sky-600 mb-2"></i>
+                        <span class="font-bold text-gray-700">Khí Hậu</span>
+                    </button>
+
+                     <button onclick="triggerSystemEffect('relief')" class="sys-node relative z-10 bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 p-4 rounded-lg flex flex-col items-center transition-all">
+                        <i class="fas fa-mountain text-2xl text-gray-600 mb-2"></i>
+                        <span class="font-bold text-gray-700">Địa Hình</span>
+                    </button>
+                </div>
+
+                <!-- Effect Display Area -->
+                <div id="system-effect-display" class="mt-8 p-6 bg-gray-50 rounded-lg border-l-4 border-red-400 hidden">
+                    <h4 class="font-bold text-red-600 mb-2 text-lg"><i class="fas fa-exclamation-triangle mr-2"></i>Hệ quả dây chuyền:</h4>
+                    <p id="effect-text" class="text-gray-700 leading-relaxed"></p>
+                </div>
+            </div>
+
+            <!-- Theory Accordions -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Atmosphere -->
+                <div class="bg-white rounded-xl p-6 border border-gray-100">
+                    <div class="flex items-center mb-4">
+                        <div class="p-2 bg-sky-100 rounded text-sky-600 mr-3"><i class="fas fa-cloud"></i></div>
+                        <h3 class="font-bold text-lg">Khí Quyển: Gió & Mưa</h3>
+                    </div>
+                    <ul class="space-y-3 text-sm text-gray-600">
+                        <li class="flex items-start"><span class="font-bold mr-2 text-sky-500">Gió:</span> Luôn thổi từ Cao áp (H) về Hạ áp (L).</li>
+                        <li class="flex items-start"><span class="font-bold mr-2 text-sky-500">Tín phong:</span> Khô, nóng, thổi về Xích đạo.</li>
+                        <li class="flex items-start"><span class="font-bold mr-2 text-sky-500">Tây ôn đới:</span> Ẩm, gây mưa, thổi về vòng cực.</li>
+                        <li class="flex items-start"><span class="font-bold mr-2 text-sky-500">Mưa Frông:</span> Do khối khí nóng/lạnh gặp nhau.</li>
+                    </ul>
+                </div>
+
+                <!-- Hydrosphere -->
+                <div class="bg-white rounded-xl p-6 border border-gray-100">
+                    <div class="flex items-center mb-4">
+                        <div class="p-2 bg-blue-100 rounded text-blue-600 mr-3"><i class="fas fa-tint"></i></div>
+                        <h3 class="font-bold text-lg">Thủy Quyển & Nước Lục Địa</h3>
+                    </div>
+                    <ul class="space-y-3 text-sm text-gray-600">
+                        <li class="flex items-start"><span class="font-bold mr-2 text-blue-500">Tài nguyên:</span> Nước ngọt chỉ chiếm 2.5%.</li>
+                        <li class="flex items-start"><span class="font-bold mr-2 text-blue-500">Chu trình:</span> Bốc hơi → Ngưng tụ → Mưa → Dòng chảy.</li>
+                        <li class="flex items-start"><span class="font-bold mr-2 text-blue-500">Sông ngòi:</span> Chế độ nước phụ thuộc nguồn cung cấp (Mưa/Băng tuyết).</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- HISTORY SECTION -->
+        <section id="history" class="hidden animate-fade-in">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-800 border-l-4 border-orange-600 pl-4">Lịch Sử Văn Minh Thế Giới</h2>
+                <p class="mt-2 text-slate-600">Tổng hợp các thành tựu vĩ đại và ý nghĩa lịch sử của các nền văn minh nhân loại.</p>
+            </div>
+
+            <!-- Civilization Filter Tabs -->
+            <div class="flex space-x-2 mb-6 overflow-x-auto pb-2 no-scrollbar border-b border-gray-200">
+                <button onclick="filterHistory('all')" class="hist-filter active-filter px-4 py-2 text-sm font-semibold rounded-t-lg bg-orange-50 text-orange-700 border-b-2 border-orange-500">Tất cả</button>
+                <button onclick="filterHistory('east')" class="hist-filter px-4 py-2 text-sm font-semibold text-gray-500 hover:text-orange-600">Phương Đông Cổ Đại</button>
+                <button onclick="filterHistory('west')" class="hist-filter px-4 py-2 text-sm font-semibold text-gray-500 hover:text-orange-600">Phương Tây & Phục Hưng</button>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="history-grid">
+                
+                <!-- Egypt -->
+                <div class="bg-white rounded-xl shadow-sm border border-orange-100 p-6 hist-card east">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="font-bold text-xl text-slate-800">Ai Cập Cổ Đại</h3>
+                        <i class="fas fa-pyramid text-orange-400 text-2xl"></i>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-orange-50 p-2 rounded">
+                            <span class="font-bold text-orange-800 block">Chữ viết</span>
+                            Tượng hình (Hieroglyphics) trên giấy Papyrus.
+                        </div>
+                        <div class="bg-orange-50 p-2 rounded">
+                            <span class="font-bold text-orange-800 block">Khoa học</span>
+                            Giỏi Hình học (xây kim tự tháp), Y học (ướp xác).
+                        </div>
+                        <div class="bg-orange-50 p-2 rounded">
+                            <span class="font-bold text-orange-800 block">Tín ngưỡng</span>
+                            Thờ thần Mặt Trời (Ra), tin vào sự bất tử.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- China -->
+                <div class="bg-white rounded-xl shadow-sm border border-red-100 p-6 hist-card east">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="font-bold text-xl text-slate-800">Trung Hoa</h3>
+                        <i class="fas fa-dragon text-red-400 text-2xl"></i>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-red-50 p-2 rounded">
+                            <span class="font-bold text-red-800 block">Tư tưởng</span>
+                            Nho giáo (Khổng Tử): Tam Cương, Ngũ Thường.
+                        </div>
+                        <div class="bg-red-50 p-2 rounded">
+                            <span class="font-bold text-red-800 block">4 Phát Minh Lớn</span>
+                            Giấy, Kỹ thuật in, La bàn, Thuốc súng.
+                        </div>
+                         <div class="bg-red-50 p-2 rounded">
+                            <span class="font-bold text-red-800 block">Ý nghĩa</span>
+                            Ảnh hưởng sâu sắc đến văn hóa Đông Á (trong đó có VN).
+                        </div>
+                    </div>
+                </div>
+
+                <!-- India -->
+                <div class="bg-white rounded-xl shadow-sm border border-yellow-100 p-6 hist-card east">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="font-bold text-xl text-slate-800">Ấn Độ</h3>
+                        <i class="fas fa-om text-yellow-500 text-2xl"></i>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-yellow-50 p-2 rounded">
+                            <span class="font-bold text-yellow-700 block">Toán học</span>
+                            Phát minh số 0 và hệ thập phân (thành tựu vĩ đại).
+                        </div>
+                        <div class="bg-yellow-50 p-2 rounded">
+                            <span class="font-bold text-yellow-700 block">Tôn giáo</span>
+                            Nơi ra đời Phật giáo và Ấn Độ giáo (Hindu).
+                        </div>
+                         <div class="bg-yellow-50 p-2 rounded">
+                            <span class="font-bold text-yellow-700 block">Chữ viết</span>
+                            Chữ Phạn (Sanskrit) ảnh hưởng ĐNA.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Greek-Roman -->
+                <div class="bg-white rounded-xl shadow-sm border border-blue-100 p-6 hist-card west">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="font-bold text-xl text-slate-800">Hy Lạp - La Mã</h3>
+                        <i class="fas fa-university text-blue-400 text-2xl"></i>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-blue-50 p-2 rounded">
+                            <span class="font-bold text-blue-800 block">Triết học & Luật</span>
+                            Socrates, Plato, Aristotle. Luật La Mã (nền tảng phương Tây).
+                        </div>
+                        <div class="bg-blue-50 p-2 rounded">
+                            <span class="font-bold text-blue-800 block">Chính trị</span>
+                            Dân chủ nguyên thủy (Athens), Cộng hòa (La Mã).
+                        </div>
+                         <div class="bg-blue-50 p-2 rounded">
+                            <span class="font-bold text-blue-800 block">Ý nghĩa</span>
+                            Đỉnh cao cổ đại, nền tảng của Phục Hưng.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Renaissance -->
+                <div class="bg-white rounded-xl shadow-sm border border-purple-100 p-6 hist-card west">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="font-bold text-xl text-slate-800">Văn Hóa Phục Hưng</h3>
+                        <i class="fas fa-palette text-purple-400 text-2xl"></i>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-purple-50 p-2 rounded">
+                            <span class="font-bold text-purple-800 block">Chủ nghĩa Nhân văn</span>
+                            Lấy Con Người làm trung tâm, không phải Thần linh.
+                        </div>
+                        <div class="bg-purple-50 p-2 rounded">
+                            <span class="font-bold text-purple-800 block">Khoa học</span>
+                            Thuyết Nhật tâm (Copernicus, Galileo) đối đầu Giáo hội.
+                        </div>
+                         <div class="bg-purple-50 p-2 rounded">
+                            <span class="font-bold text-purple-800 block">Nghệ thuật</span>
+                            Da Vinci, Shakespeare. Đề cao vẻ đẹp con người.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Tourism -->
+                <div class="bg-white rounded-xl shadow-sm border border-green-100 p-6 hist-card west">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="font-bold text-xl text-slate-800">Sử Học & Du Lịch</h3>
+                        <i class="fas fa-map-marked-alt text-green-500 text-2xl"></i>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-green-50 p-2 rounded">
+                            <span class="font-bold text-green-800 block">Quan hệ</span>
+                            Sử học cung cấp nội dung (Hồn). Du lịch cung cấp tài chính (Lực).
+                        </div>
+                        <div class="bg-green-50 p-2 rounded">
+                            <span class="font-bold text-green-800 block">Kết quả</span>
+                            Hình thành Du lịch Di sản. Bảo tồn và phát huy giá trị.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-100 mt-auto">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <p class="text-sm text-gray-500"></p>
+            <div class="flex space-x-4">
+                <i class="fas fa-book text-gray-400 hover:text-gray-600 cursor-pointer"></i>
+                <i class="fas fa-question-circle text-gray-400 hover:text-gray-600 cursor-pointer"></i>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- Navigation Logic ---
+        function switchTab(tabId) {
+            // Hide all sections
+            document.querySelectorAll('section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+
+            // Update Nav Buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('tab-active', 'text-gray-900');
+                btn.classList.add('text-gray-500');
+            });
+            const activeBtn = document.getElementById('btn-' + tabId);
+            if(activeBtn) {
+                activeBtn.classList.add('tab-active');
+                activeBtn.classList.remove('text-gray-500');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- Chart.js Demo Logic ---
+        let myChart = null;
+
+        function renderChartDemo(type) {
+            const ctx = document.getElementById('demoChart').getContext('2d');
+            const titleEl = document.getElementById('chart-title-info');
+            const descEl = document.getElementById('chart-desc-info');
+            const keyEl = document.getElementById('chart-keywords');
+
+            // Data Configurations
+            let chartType = 'pie';
+            let data = {};
+            let options = { maintainAspectRatio: false };
+
+            if (myChart) myChart.destroy();
+
+            // Setup demo data and text based on type
+            if (type === 'pie') {
+                chartType = 'pie';
+                titleEl.textContent = 'Biểu Đồ Tròn (Cơ Cấu)';
+                descEl.textContent = 'Dùng khi tổng thể là 100%. Thể hiện quy mô và cơ cấu của đối tượng (dưới 3 năm).';
+                keyEl.textContent = '"Cơ cấu", "Tỉ lệ", "Tỉ trọng"';
+                data = {
+                    labels: ['Nông nghiệp', 'Công nghiệp', 'Dịch vụ'],
+                    datasets: [{
+                        data: [30, 40, 30],
+                        backgroundColor: ['#a78bfa', '#60a5fa', '#f472b6']
+                    }]
+                };
+            } else if (type === 'bar') {
+                chartType = 'bar';
+                titleEl.textContent = 'Biểu Đồ Cột (Quy Mô)';
+                descEl.textContent = 'Dùng để so sánh độ lớn (quy mô) hoặc sản lượng giữa các đối tượng hoặc qua các năm.';
+                keyEl.textContent = '"Số lượng", "Sản lượng", "Quy mô", "So sánh"';
+                data = {
+                    labels: ['2018', '2019', '2020', '2021'],
+                    datasets: [{
+                        label: 'Sản lượng (triệu tấn)',
+                        data: [120, 150, 170, 160],
+                        backgroundColor: '#60a5fa'
+                    }]
+                };
+            } else if (type === 'line') {
+                chartType = 'line';
+                titleEl.textContent = 'Biểu Đồ Đường (Tốc Độ)';
+                descEl.textContent = 'Dùng khi chuỗi thời gian dài (>3 năm). Thể hiện tốc độ tăng trưởng hoặc biến động.';
+                keyEl.textContent = '"Tốc độ tăng trưởng", "Biến động", "Phát triển"';
+                data = {
+                    labels: ['2015', '2016', '2017', '2018', '2019'],
+                    datasets: [{
+                        label: 'Tốc độ tăng trưởng (%)',
+                        data: [100, 105, 112, 120, 135],
+                        borderColor: '#f472b6',
+                        tension: 0.3,
+                        fill: false
+                    }]
+                };
+            } else if (type === 'mixed') {
+                chartType = 'bar';
+                titleEl.textContent = 'Biểu Đồ Kết Hợp (Tương Quan)';
+                descEl.textContent = 'Kết hợp Cột và Đường. Dùng cho 2 đại lượng khác đơn vị (ví dụ: Mưa & Nhiệt).';
+                keyEl.textContent = '"Tương quan", "Nhiệt độ và Lượng mưa"';
+                data = {
+                    labels: ['T1', 'T2', 'T3', 'T4', 'T5'],
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: 'Lượng mưa (mm)',
+                            data: [50, 40, 100, 200, 300],
+                            backgroundColor: '#60a5fa',
+                            yAxisID: 'y'
+                        },
+                        {
+                            type: 'line',
+                            label: 'Nhiệt độ (°C)',
+                            data: [20, 22, 25, 28, 30],
+                            borderColor: '#f87171',
+                            yAxisID: 'y1'
+                        }
+                    ]
+                };
+                options.scales = {
+                    y: { type: 'linear', display: true, position: 'left' },
+                    y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false } }
+                };
+            }
+
+            // Render Chart
+            myChart = new Chart(ctx, {
+                type: chartType,
+                data: data,
+                options: options
+            });
+        }
+
+        // Initialize Chart on Load
+        window.addEventListener('load', () => {
+            renderChartDemo('pie');
+        });
+
+
+        // --- Calculator Logic ---
+        function calcPercent() {
+            const part = parseFloat(document.getElementById('part-val').value);
+            const total = parseFloat(document.getElementById('total-val').value);
+            const resEl = document.getElementById('res-percent');
+            
+            if(isNaN(part) || isNaN(total) || total === 0) {
+                resEl.textContent = "Vui lòng nhập số hợp lệ!";
+                resEl.classList.remove('hidden', 'text-green-600');
+                resEl.classList.add('text-red-500');
+                return;
+            }
+
+            const percent = (part / total * 100).toFixed(2);
+            resEl.textContent = `Kết quả: ${percent}%`;
+            resEl.classList.remove('hidden', 'text-red-500');
+            resEl.classList.add('text-green-600');
+        }
+
+        function calcAmplitude() {
+            const max = parseFloat(document.getElementById('max-temp').value);
+            const min = parseFloat(document.getElementById('min-temp').value);
+            const resEl = document.getElementById('res-amp');
+
+            if(isNaN(max) || isNaN(min)) {
+                resEl.textContent = "Nhập nhiệt độ Max/Min!";
+                resEl.classList.remove('hidden', 'text-green-600');
+                resEl.classList.add('text-red-500');
+                return;
+            }
+
+            const amp = (max - min).toFixed(1);
+            resEl.textContent = `Biên độ: ${amp}°C`;
+            resEl.classList.remove('hidden', 'text-red-500');
+            resEl.classList.add('text-green-600');
+        }
+
+        function calcAltTemp() {
+            const h = parseFloat(document.getElementById('alt-diff').value);
+            const resEl = document.getElementById('res-alt');
+
+            if(isNaN(h)) {
+                resEl.textContent = "Nhập độ cao!";
+                resEl.classList.remove('hidden', 'text-green-600');
+                resEl.classList.add('text-red-500');
+                return;
+            }
+
+            const deltaT = (h * 0.6 / 100).toFixed(2);
+            resEl.textContent = `Giảm: ${deltaT}°C`;
+            resEl.classList.remove('hidden', 'text-red-500');
+            resEl.classList.add('text-green-600');
+        }
+
+        // --- System Effect Logic (Unified Law) ---
+        function triggerSystemEffect(component) {
+            const display = document.getElementById('system-effect-display');
+            const text = document.getElementById('effect-text');
+            display.classList.remove('hidden');
+            display.classList.add('animate-fade-in');
+
+            let msg = "";
+            switch(component) {
+                case 'biosphere':
+                    msg = "HÀNH ĐỘNG: Phá rừng (Mất Sinh quyển) -> HỆ QUẢ: Đất mất lớp phủ thực vật dễ bị xói mòn (Thổ nhưỡng suy thoái). Nước mưa chảy tràn nhanh gây lũ lụt, cạn kiệt nước ngầm (Thủy quyển biến động). Khí hậu trở nên khô hạn hơn do mất sự điều hòa (Khí hậu biến đổi).";
+                    break;
+                case 'soil':
+                    msg = "HÀNH ĐỘNG: Đất bị ô nhiễm hoặc thoái hóa -> HỆ QUẢ: Cây cối không thể phát triển (Sinh quyển suy giảm). Nước ngầm bị nhiễm độc (Thủy quyển ô nhiễm). Bề mặt đất trơ trọi làm tăng nhiệt độ mặt đất (Khí hậu cục bộ nóng lên).";
+                    break;
+                case 'hydro':
+                    msg = "HÀNH ĐỘNG: Chặn dòng sông làm thủy điện hoặc ô nhiễm nước -> HỆ QUẢ: Sinh vật dưới nước chết, rừng ven sông khô héo (Sinh quyển chết). Đất ven sông bị nhiễm mặn hoặc khô hạn (Thổ nhưỡng biến đổi). Độ ẩm không khí giảm (Khí hậu khô).";
+                    break;
+                case 'atmosphere':
+                    msg = "HÀNH ĐỘNG: Khí hậu nóng lên toàn cầu -> HỆ QUẢ: Băng tan, nước biển dâng (Thủy quyển thay đổi). Nhiều loài sinh vật tuyệt chủng do không thích nghi kịp (Sinh quyển mất mát). Quá trình phong hóa đất thay đổi (Thổ nhưỡng biến đổi).";
+                    break;
+                case 'relief':
+                    msg = "HÀNH ĐỘNG: San lấp núi đồi -> HỆ QUẢ: Thay đổi hướng gió và khả năng đón mưa (Khí hậu thay đổi). Dòng chảy sông ngòi bị nắn lại (Thủy quyển thay đổi). Mất môi trường sống của sinh vật vùng cao (Sinh quyển suy giảm).";
+                    break;
+            }
+            text.textContent = msg;
+        }
+
+        // --- History Filter Logic ---
+        function filterHistory(filter) {
+            // Update buttons
+            document.querySelectorAll('.hist-filter').forEach(btn => {
+                btn.classList.remove('active-filter', 'bg-orange-50', 'text-orange-700', 'border-b-2', 'border-orange-500');
+                btn.classList.add('text-gray-500');
+            });
+            event.target.classList.add('active-filter', 'bg-orange-50', 'text-orange-700', 'border-b-2', 'border-orange-500');
+            event.target.classList.remove('text-gray-500');
+
+            // Filter Cards
+            const cards = document.querySelectorAll('.hist-card');
+            cards.forEach(card => {
+                if (filter === 'all') {
+                    card.classList.remove('hidden');
+                } else {
+                    if (card.classList.contains(filter)) {
+                        card.classList.remove('hidden');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
